@@ -7,8 +7,8 @@ var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 var fs = require('fs');
-var timeFormat = require('strftime');
-var db = require("mongojs").connect("vehicle_crawler", ["vehicles"]);
+var crawler = require('./crawler/vehicle-crawler.js');
+var timers = require("timers");
 var app = express();
 
 // all environments
@@ -28,76 +28,46 @@ if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
 }
 
-function errorWhileReadingFile(path) {
-	var msg = 'file does not exists for path: ' + path;
-	console.log(msg);
-	res.send(400, msg);
-}
+// Crawwwwl.
+var vehicles = [];
+var crawl_vehicles = function() {
+	crawler.crawl(function(new_vehicles) {
+		vehicles = new_vehicles;
+	}); 	
+};
 
-function sendOutput(req, res, data) {
-	content = data;
-	if (req.query.jsonp) {
-		content = req.query.jsonp + '(' + data + ')';
-	}
-	return res.send(200, content);
-}
+timers.setInterval(crawl_vehicles, 5 * 60000);
+crawl_vehicles();
 
-function getVehiclesForCityAndTimestamp(req, res, city, timestamp) {
-	var time = timeFormat('%F-%H-%M', new Date(timestamp * 1000));
-	console.log(time);
 
-	var query = new Object();
-	if (req.param('msp')) {
-		query.provider = req.query.msp;
-	}
-	query.city = city;
-	query.timestring = time;
+// API
 
-	var vehicles = db.vehicles.find(query, function(err, docs) {
-		sendOutput(req, res, JSON.stringify(docs));
+app.get('/vehicles', function(req, res) {
+	res.set({
+		"Content-Type" : "application/json; charset=utf-8"
 	});
-}
 
-function getAvailableMSPs(req, res) {
-	var path = './dataSource/available-msps.js';
-
-	fs.readFile(path, 'utf8', function(err, data) {
-		if (err) {
-			errorWhileReadingFile(path);
-		}
-		sendOutput(req, res, data);
-	});
-}
-
-function getAvailableLocations(req, res) {
-	var path = './dataSource/available-locations.js';
-
-	fs.readFile(path, 'utf8', function(err, data) {
-		if (err) {
-			errorWhileReadingFile(path);
-		}
-		sendOutput(req, res, data);
-	});
-}
-
-
-app.get('/', routes.index);
+	res.send(200, JSON.stringify(vehicles));
+});
 
 app.get('/vehicles/:city', function(req, res) {
-	if (!req.query.timestamp) {
-		res.send(400, 'Please enter a timestamp!')
-	} else {
-		getVehiclesForCityAndTimestamp(req, res, req.params.city, req.query.timestamp);
+	res.set({
+		"Content-Type" : "application/json; charset=utf-8"
+	});
+
+	var max_fuel_level = parseInt(req.query.max_fuel_level, 10);
+	if ( typeof req.query.max_fuel_level === 'undefined' ) {
+		max_fuel_level = 100;
 	}
+
+	var filtered = vehicles.filter(function(vehicle) {
+		return vehicle.city === req.params.city && vehicle.fuel_level <= max_fuel_level;
+	});
+
+	res.send(200, JSON.stringify(filtered));
 });
 
-app.get('/msps', function(req, res) {
-	getAvailableMSPs(req, res);
-});
-
-app.get('/locations', function(req, res) {
-	getAvailableLocations(req, res);
-});
+// --------
 
 http.createServer(app).listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));

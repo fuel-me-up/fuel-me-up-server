@@ -10,6 +10,7 @@ var parser = function(data, callback) {
         vehicles.forEach(function (vehicle, index) {
             output.push({
                 vin : vehicle.vin, 
+                fuel_level: parseInt(vehicle.fuelState, 10),
                 coordinate: vehicle.position,
                 provider : "drive-now"
             });

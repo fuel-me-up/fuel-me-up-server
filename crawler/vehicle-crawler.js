@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
 var fs = require("fs");
-var timers = require("timers");
 var argv = require("optimist").argv;
 var moment = require("moment");
-var db = require("mongojs").connect("vehicle_crawler", ["vehicles"]);
+// var db = require("mongojs").connect("vehicle_crawler", ["vehicles"]);
 
 var notify = (function() {
     var counters = {};
@@ -27,7 +26,7 @@ var notify = (function() {
 var crawlers = ["car2go", "drive-now"];
 var cities = ["amsterdam", "austin", "berlin", "birmingham", "calgary", "columbus", "denver", "duesseldorf", "hamburg", "koeln", "london", "miami", "milano", "minneapolis", "montreal", "muenchen", "portland", "sandiego", "seattle", "stuttgart", "toronto", "ulm", "vancouver", "washingtondc", "wien", "6099", "1774", "1293", "40065", "4604", "4259"];
 
-var crawl = function() {
+var crawl = function(callback) {
     var vehicle_list = {};
     
     notify("requests", crawlers.length * cities.length, function() {
@@ -40,15 +39,21 @@ var crawl = function() {
             cities_count += 1;
         }
 
+        var vehicles = [];
         for (var city in vehicle_list) {
-            var vehicles = vehicle_list[city].map(function(item) {
+            var mapped = vehicle_list[city].map(function(item) {
                 item.city = city;
                 item.timestamp = timestamp;
                 item.timestring = timestring;
                 return item;
             });
 
-            db.vehicles.insert(vehicles);
+            vehicles = vehicles.concat(mapped);
+        }
+
+        if ( typeof callback === 'function' )
+        {
+            callback(vehicles);
         }
 
         console.log("Vehicle refresh complete #################################");
@@ -76,6 +81,12 @@ var crawl = function() {
     });
 };
 
+
+// Export
+module.exports = {
+    crawl: crawl
+};
+
 // Muahahahaha
-crawl();
-timers.setInterval(crawl, 60000);
+// crawl();
+// timers.setInterval(crawl, 60000);
