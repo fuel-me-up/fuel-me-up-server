@@ -1,0 +1,14 @@
+{
+  "name": "h4ck41onB3",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.4.4",
+    "jade": "*",
+    "strftime" : "*",
+    "mongojs" : "*"
+  }
+}
