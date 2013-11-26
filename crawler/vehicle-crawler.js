@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 var fs = require("fs");
-var argv = require("optimist").argv;
 var moment = require("moment");
 // var db = require("mongojs").connect("vehicle_crawler", ["vehicles"]);
 

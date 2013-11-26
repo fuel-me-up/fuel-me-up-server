@@ -7,7 +7,6 @@
         "start" : "node vehicle-crawler.js"
     },
     "dependencies" : {
-        "optimist" : "*",
         "moment" : "*",
         "mongojs" : "*"
     }
