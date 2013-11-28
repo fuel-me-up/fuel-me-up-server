@@ -8,6 +8,7 @@ var http = require('http');
 var path = require('path');
 var fs = require('fs');
 var crawler = require('./crawler/vehicle-crawler.js');
+var gasstation_crawler = require('./crawler/gasstations/gasstations-crawler.js');
 var timers = require("timers");
 var app = express();
 
@@ -40,6 +41,17 @@ timers.setInterval(crawl_vehicles, 5 * 60000);
 crawl_vehicles();
 
 
+var gasstations = [];
+var crawl_gasstations = function() {
+	gasstation_crawler.crawl(function(new_gasstations) {
+		gasstations = new_gasstations;
+	}); 	
+};
+
+timers.setInterval(crawl_gasstations, 5 * 60000);
+crawl_gasstations();
+
+
 // API
 
 app.get('/vehicles', function(req, res) {
@@ -66,6 +78,37 @@ app.get('/vehicles/:city', function(req, res) {
 
 	res.send(200, JSON.stringify(filtered));
 });
+
+app.get('/gasstations', function(req, res) {
+	res.set({
+		"Content-Type" : "application/json; charset=utf-8"
+	});
+
+	res.send(200, JSON.stringify(gasstations));
+});
+
+app.get('/gasstations/:city', function(req, res) {
+	res.set({
+		"Content-Type" : "application/json; charset=utf-8"
+	});
+
+	var provider = req.query.provider;
+	if ( typeof req.query.provider === 'undefined' ) {
+		provider = [];
+	}
+
+
+	var filtered = gasstations.filter(function(gasstation) {
+		if ( provider.length > 0 ) {
+			return provider.indexOf(gasstations.provider) !== -1;
+		}
+
+		return gasstation.city === req.params.city;
+	});
+
+	res.send(200, JSON.stringify(filtered));
+});
+
 
 // --------
 
