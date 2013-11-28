@@ -11,6 +11,7 @@ var parser = function(data, callback) {
             output.push({
                 vin : vehicle.vin, 
                 fuel_level: parseInt(vehicle.fuelState, 10),
+                license_plate: vehicle.licensePlate.replace(/\s{2,}/, " "),
                 coordinate: vehicle.position,
                 provider : "drive-now"
             });

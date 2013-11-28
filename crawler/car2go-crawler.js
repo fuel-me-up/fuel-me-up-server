@@ -10,6 +10,7 @@ var parser = function(data, callback) {
             output.push({
                 vin : vehicle.vin, 
                 fuel_level: vehicle.fuel,
+                license_plate: vehicle.name,
                 coordinate : {
                     latitude : vehicle.coordinates[1],
                     longitude : vehicle.coordinates[0],
