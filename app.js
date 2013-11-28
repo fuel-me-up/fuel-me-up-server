@@ -96,14 +96,27 @@ app.get('/gasstations/:city', function(req, res) {
 	if ( typeof req.query.provider === 'undefined' ) {
 		provider = [];
 	}
-
+	else if ( typeof req.query.provider === 'string' ) {
+		provider = [req.query.provider];
+	}
 
 	var filtered = gasstations.filter(function(gasstation) {
+		var matches_provider = true;
 		if ( provider.length > 0 ) {
-			return provider.indexOf(gasstations.provider) !== -1;
+			matches_provider = false;
+
+outer_loop:
+			for ( var i = 0; i < provider.length; i++ ) {
+				for ( var j = 0; j < gasstation.provider.length; j++ ) {
+					if ( provider[i] === gasstation.provider[j] ) {
+						matches_provider = true;
+						break outer_loop;
+					}
+				}		
+			}
 		}
 
-		return gasstation.city === req.params.city;
+		return matches_provider && gasstation.city === req.params.city;
 	});
 
 	res.send(200, JSON.stringify(filtered));
