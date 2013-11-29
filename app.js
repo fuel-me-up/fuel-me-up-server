@@ -5,12 +5,14 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
-var fs = require('fs');
-var crawler = require('./crawler/vehicles/vehicle-crawler.js');
-var gasstation_crawler = require('./crawler/gasstations/gasstations-crawler.js');
-var vehicles_api = require(__dirname + "/routes/vehicles.js");
-var gasstations_api = require(__dirname + "/routes/gasstations.js");
 var timers = require("timers");
+
+var crawler = require(path.join(__dirname, "crawler/vehicles/vehicle-crawler.js"));
+var gasstation_crawler = require(path.join(__dirname, "crawler/gasstations/gasstations-crawler.js"));
+var site = require(path.join(__dirname, "routes/site.js"));
+var vehicles_api = require(path.join(__dirname, "routes/vehicles.js"));
+var gasstations_api = require(path.join(__dirname, "routes/gasstations.js"));
+
 var app = express();
 
 // all environments
@@ -34,7 +36,7 @@ if ('development' == app.get('env')) {
 var crawl_vehicles = function() {
 	crawler.crawl(function(new_vehicles) {
 		vehicles_api.vehicles(new_vehicles);
-	}); 	
+	});
 };
 
 timers.setInterval(crawl_vehicles, 5 * 60000);
@@ -44,7 +46,7 @@ crawl_vehicles();
 var crawl_gasstations = function() {
 	gasstation_crawler.crawl(function(new_gasstations) {
 		gasstations_api.gasstations(new_gasstations);
-	}); 	
+	});
 };
 
 timers.setInterval(crawl_gasstations, 5 * 60000);
@@ -52,6 +54,7 @@ crawl_gasstations();
 
 
 // API
+app.get('/', site.index);
 
 app.get('/vehicles', vehicles_api.all_vehicles);
 app.get('/vehicles/:city', vehicles_api.vehicles_in_city);

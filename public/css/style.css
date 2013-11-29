@@ -1,0 +1,6 @@
+html { height: 100% }
+body { height: 100%; font-family: 'Open sans'; font-weight: 300; margin: 0; padding: 0 }
+form { background-color: #fff; padding : 15px 20px; width: 50%; display: block; position: absolute; top: 80%; left: 25%; -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px; }
+label { width: 25%; float: left; }
+input { width: 74%; }
+#map-canvas { height: 100% }

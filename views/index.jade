@@ -1,5 +1,8 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+    div(id="map-canvas")
+        
+    form(id="filter-control")
+        label(for="max-fuel-level")="Maximum fuel level"
+        input(id="max-fuel-level", type="range", min="0", max="100", value="25")
