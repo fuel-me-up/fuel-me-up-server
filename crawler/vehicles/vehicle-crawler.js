@@ -60,7 +60,7 @@ var crawl = function(callback) {
 
     cities.forEach(function(city, index) {
         crawlers.forEach(function(crawler_name, index) {
-            var crawler = require("./" + crawler_name + "-crawler.js");
+            var crawler = require(__dirname + "/" + crawler_name + "-crawler.js");
 
             crawler.crawl(city, function(err, real_city, vehicles) {
                 if ( !err ) {
