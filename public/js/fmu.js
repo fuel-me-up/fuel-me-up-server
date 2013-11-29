@@ -22,6 +22,10 @@
         if (Object.prototype.toString.call(vehicles) === "[object Array]") {
             map_cluster.clearMarkers();
 
+            var map_info_window = new google.maps.InfoWindow({
+                content: ""
+            });
+
             var markers = [];
             for (var i = 0; i < vehicles.length; i++) {
                 var marker = new google.maps.Marker({
@@ -32,7 +36,7 @@
                 (function(marker, vehicle) {
                     google.maps.event.addListener(marker, "click", function() {
                         map_info_window.setContent("<div style=\"line-height:1.35;overflow:hidden;white-space:nowrap;\">" + vehicle.provider + ", license plate <strong>" + vehicle.license_plate + "</strong></div>");
-                        map_info_window.open(map, marker);
+                        map_info_window.open(map_cluster.map, marker);
                     });
                 })(marker, vehicles[i]);
                 markers.push(marker);
@@ -45,9 +49,6 @@
     $(document).ready(function() {
         var map = initialize_map();
         var map_marker_cluster = new MarkerClusterer(map, []);
-        var map_info_window = new google.maps.InfoWindow({
-            content: ""
-        });
 
         fetch_vehicles({
             max_fuel_level: 25
