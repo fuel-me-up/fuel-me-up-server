@@ -1,6 +1,7 @@
 (function() {
     var initialize_map = function() {
         var mapOptions = {
+            disableDefaultUI: true,
             center: new google.maps.LatLng(53.568861, 10.000091),
             zoom: 13
         };
@@ -35,7 +36,7 @@
 
                 (function(marker, vehicle) {
                     google.maps.event.addListener(marker, "click", function() {
-                        map_info_window.setContent("<div style=\"line-height:1.35;overflow:hidden;white-space:nowrap;\">" + vehicle.provider + ", license plate <strong>" + vehicle.license_plate + "</strong></div>");
+                        map_info_window.setContent("<div style=\"line-height:1.35;overflow:hidden;white-space:nowrap;\"><h1>" + vehicle.license_plate + "<small> (" + vehicle.fuel_level + "%)</small></h1><p>" + vehicle.provider + "</p></div>");
                         map_info_window.open(map_cluster.map, marker);
                     });
                 })(marker, vehicles[i]);

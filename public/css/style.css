@@ -1,6 +1,12 @@
 html { height: 100% }
 body { height: 100%; font-family: 'Open sans'; font-weight: 300; margin: 0; padding: 0 }
-form { background-color: #fff; padding : 15px 20px; width: 50%; display: block; position: absolute; top: 80%; left: 25%; -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px; }
-label { width: 25%; float: left; }
-input { width: 74%; }
+form { background-color: rgba(255,255,255,.85); display: block; position: absolute; bottom: 0px; margin: 0 25px 25px 25px; padding: 20px 10px; -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px; }
+input { display: inline-block; margin: 6px 0 0 0; width: 100%; }
+label { text-align: right; width: 100%; }
+output, label { padding: 4px 0 0 0; }
+input, output, label { vertical-align: middle; }
+.vertically-centered { vertical-align: middle; }
+
 #map-canvas { height: 100% }
+div.gm-style-iw { font-family: 'Open sans'; font-weight: 400; }
+div.gm-style-iw h1 { font-size: 12pt; }
