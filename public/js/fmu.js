@@ -67,15 +67,19 @@
                 }
                 timer = setTimeout(trig, timeout);
             });
-        })($("#max-fuel-level"), 750);
+        })($("input.max-fuel-level"), 750);
 
-        $("#max-fuel-level").bind("changed", function() {
-            console.log("changed: " + $(this).val());
-            fetch_vehicles({
-                max_fuel_level: parseInt($(this).val())
-            }, function(res) {
-                set_markers(res, map_marker_cluster);
+        $("input.max-fuel-level")
+            .bind("changed", function() {
+                console.log("changed: " + $(this).val());
+                fetch_vehicles({
+                    max_fuel_level: parseInt($(this).val())
+                }, function(res) {
+                    set_markers(res, map_marker_cluster);
+                });
+            })
+            .bind("change", function() {
+                $("output.max-fuel-level").text(this.value + "%");
             });
-        });
     });
 })();

@@ -6,6 +6,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var timers = require("timers");
+var gzippo = require("gzippo");
 
 var crawler = require(path.join(__dirname, "crawler/vehicles/vehicle-crawler.js"));
 var gasstation_crawler = require(path.join(__dirname, "crawler/gasstations/gasstations-crawler.js"));
@@ -19,6 +20,7 @@ var app = express();
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.use(gzippo.compress());
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
@@ -28,8 +30,10 @@ app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
+var crawler_interval = 5 * 60000;
 if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
+	crawler_interval = 60 * 60000;
 }
 
 // Crawwwwl.
@@ -39,7 +43,7 @@ var crawl_vehicles = function() {
 	});
 };
 
-timers.setInterval(crawl_vehicles, 5 * 60000);
+timers.setInterval(crawl_vehicles, crawler_interval);
 crawl_vehicles();
 
 
@@ -49,7 +53,7 @@ var crawl_gasstations = function() {
 	});
 };
 
-timers.setInterval(crawl_gasstations, 5 * 60000);
+timers.setInterval(crawl_gasstations, crawler_interval);
 crawl_gasstations();
 
 
