@@ -1,75 +1,55 @@
 #!/usr/bin/env node
 
+var path = require('path');
 var moment = require("moment");
-
-var notify = (function() {
-    var counters = {};
-    var callbacks = {};
-    return function() {
-        if (arguments.length == 3) {
-            counters[arguments[0]] = arguments[1];
-            callbacks[arguments[0]] = arguments[2];
-        } else {
-            counters[arguments[0]] -= 1;
-            if (counters[arguments[0]] == 0) {
-                callbacks[arguments[0]]();
-            }
-        }
-    };
-})();
+var async = require("async");
 
 // MWAHAHAHA
 var crawlers = ["car2go", "drive-now"];
 var cities = ["amsterdam", "austin", "berlin", "birmingham", "calgary", "columbus", "denver", "duesseldorf", "hamburg", "koeln", "london", "miami", "milano", "minneapolis", "montreal", "muenchen", "portland", "sandiego", "seattle", "stuttgart", "toronto", "ulm", "vancouver", "washingtondc", "wien", "6099", "1774", "1293", "40065", "4604", "4259"];
 
 var crawl = function(callback) {
-    var vehicle_list = {};
+    var requests = [];
+    cities.forEach(function(city, index) {
+        crawlers.forEach(function(provider, index) {
+            var crawler = require(path.join(__dirname, provider + "-crawler.js"));
 
-    notify("requests", crawlers.length * cities.length, function() {
-        var date = new Date();
-        var timestamp = date.getTime();
-        var timestring = moment(date).format("YYYY-MM-DD-HH-mm");
+            requests.push(function(async_callback) {
+                crawler.crawl(city, function(err, real_city, vehicles) {
+                    if (!err) {
+                        async_callback(null, {
+                            city: real_city,
+                            vehicles: vehicles.map(function(vehicle) {
+                                vehicle.city = real_city;
 
-        var cities_count = 0;
-        for (var city in vehicle_list) {
-            cities_count += 1;
-        }
-
-        var vehicles = [];
-        for (var city in vehicle_list) {
-            var mapped = vehicle_list[city].map(function(item) {
-                item.city = city;
-                return item;
+                                return vehicle;
+                            })
+                        });
+                    } else if (err.name !== "OutOfBusinessAreaError") {
+                        console.error("[Error] " + err);
+                        async_callback(err, null);
+                    } else {
+                        async_callback(null, null);
+                    }
+                });
             });
+        });
+    });
 
-            vehicles = vehicles.concat(mapped);
-        }
+    async.parallel(requests, function(err, results) {
+        var vehicles = [];
+
+        results.forEach(function(item) {
+            if (item !== null && typeof item !== "undefined" && typeof item.vehicles !== "undefined") {
+                vehicles = vehicles.concat(item.vehicles);
+            }
+        });
 
         if (typeof callback === 'function') {
             callback(vehicles);
         }
 
         console.log("[" + moment().format("YYYY-MM-DD HH:mm:ss") + "] Vehicle refresh complete #####################################");
-    });
-
-    cities.forEach(function(city, index) {
-        crawlers.forEach(function(crawler_name, index) {
-            var crawler = require(__dirname + "/" + crawler_name + "-crawler.js");
-
-            crawler.crawl(city, function(err, real_city, vehicles) {
-                if (!err) {
-                    if (typeof vehicle_list[real_city] == 'undefined') {
-                        vehicle_list[real_city] = [];
-                    }
-
-                    vehicle_list[real_city] = vehicle_list[real_city].concat(vehicles);
-                } else if (err.name !== "OutOfBusinessAreaError") {
-                    console.error("[Error] " + err);
-                }
-
-                notify("requests");
-            });
-        });
     });
 };
 
@@ -78,7 +58,3 @@ var crawl = function(callback) {
 module.exports = {
     crawl: crawl
 };
-
-// Muahahahaha
-// crawl();
-// timers.setInterval(crawl, 60000);

@@ -1,47 +1,51 @@
 #!/usr/bin/env node
+
+var path = require('path');
 var moment = require("moment");
+var async = require("async");
 
-
-var notify = (function() {
-    var counters = {};
-    var callbacks = {};
-    return function() {
-        if (arguments.length == 3) {
-            counters[arguments[0]] = arguments[1];
-            callbacks[arguments[0]] = arguments[2];
-        } else {
-            counters[arguments[0]] -= 1;
-            if (counters[arguments[0]] == 0) {
-                callbacks[arguments[0]]();
-            }
-        }
-    };
-})();
-
-// MWAHAHAHA
 var crawlers = ["car2go", "drive-now"];
 var cities = ["amsterdam", "austin", "berlin", "birmingham", "calgary", "columbus", "denver", "duesseldorf", "hamburg", "koeln", "london", "miami", "milano", "minneapolis", "montreal", "muenchen", "portland", "sandiego", "seattle", "stuttgart", "toronto", "ulm", "vancouver", "washingtondc", "wien", "6099", "1774", "1293", "40065", "4604", "4259"];
 
 var crawl = function(callback) {
-    var gasstations_list = {};
+    var requests = [];
+    cities.forEach(function(city, index) {
+        crawlers.forEach(function(provider, index) {
+            var crawler = require(path.join(__dirname, provider + "-gasstations-crawler.js"));
 
-    notify("requests", crawlers.length * cities.length, function() {
-        var cities_count = 0;
-        for (var city in gasstations_list) {
-            cities_count += 1;
-        }
+            requests.push(function(async_callback) {
+                crawler.crawl(city, function(err, real_city, gasstations) {
+                    if (!err) {
+                        async_callback(null, {
+                            city: real_city,
+                            gasstations: gasstations.map(function(gasstation) {
+                                gasstation.city = real_city;
+                                gasstation.provider = [gasstation.provider];                                
 
-        var gasstations = [];
-        for (var city in gasstations_list) {
-            var mapped = gasstations_list[city].map(function(item) {
-                item.city = city;
-                item.provider = [item.provider]
-                return item;
+                                return gasstation;
+                            })
+                        });
+                    } else if (err.name !== "OutOfBusinessAreaError") {
+                        console.error("[Error] " + err);
+                        async_callback(err, null);
+                    } else {
+                        async_callback(null, null);
+                    }
+                });
             });
+        });
+    });
 
-            gasstations = gasstations.concat(mapped);
-        }
+    async.parallel(requests, function(err, results) {
+        var gasstations = [];
 
+        results.forEach(function(item) {
+            if (item !== null && typeof item !== "undefined" && typeof item.gasstations !== "undefined") {
+                gasstations = gasstations.concat(item.gasstations);
+            }
+        });
+
+        // Remove gasstations that serve multiple carsharing providers
         // Join the stations that are doubled
         var reduced_gasstations = [];
         for (var i = 0; i < gasstations.length; i++) {
@@ -71,28 +75,7 @@ var crawl = function(callback) {
 
         console.log("[" + moment().format("YYYY-MM-DD HH:mm:ss") + "] Gasstations refresh complete #################################");
     });
-
-    cities.forEach(function(city, index) {
-        crawlers.forEach(function(crawler_name, index) {
-            var crawler = require(__dirname + "/" + crawler_name + "-gasstations-crawler.js");
-
-            crawler.crawl(city, function(err, real_city, gasstations) {
-                if (!err) {
-                    if (typeof gasstations_list[real_city] == 'undefined') {
-                        gasstations_list[real_city] = [];
-                    }
-
-                    gasstations_list[real_city] = gasstations_list[real_city].concat(gasstations);
-                } else if (err.name !== "OutOfBusinessAreaError") {
-                    console.error("[Error] " + err);
-                }
-
-                notify("requests");
-            });
-        });
-    });
 };
-
 
 // Export
 module.exports = {
