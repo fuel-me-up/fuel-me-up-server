@@ -31,9 +31,14 @@ app.use(app.router);
 
 // development only
 var crawler_interval = 3 * 60000;
+if (typeof process.env.UPDATE_INTERVAL !== "undefined") {
+    crawler_interval = parseFloat(process.env.UPDATE_INTERVAL) * 60000;
+}
+
+console.info("Setting crawler interval to " + (crawler_interval / 1000) + " seconds");
+
 if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
-	crawler_interval = 0.5 * 60000;
 }
 
 // Crawwwwl.
