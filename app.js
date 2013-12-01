@@ -28,14 +28,12 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(app.router);
-// app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 var crawler_interval = 5 * 60000;
 if ('development' == app.get('env')) {
-	console.info("using development environment");
 	app.use(express.errorHandler());
-	crawler_interval = 60 * 60000;
+	crawler_interval = 0.5 * 60000;
 }
 
 // Crawwwwl.

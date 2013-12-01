@@ -1,24 +1,21 @@
 #!/usr/bin/env node
 
-var fs = require("fs");
 var moment = require("moment");
-// var db = require("mongojs").connect("vehicle_crawler", ["vehicles"]);
 
 var notify = (function() {
     var counters = {};
     var callbacks = {};
     return function() {
-        if ( arguments.length == 3 ) {
+        if (arguments.length == 3) {
             counters[arguments[0]] = arguments[1];
             callbacks[arguments[0]] = arguments[2];
-        }
-        else {
+        } else {
             counters[arguments[0]] -= 1;
-            if ( counters[arguments[0]] == 0 ) {
+            if (counters[arguments[0]] == 0) {
                 callbacks[arguments[0]]();
             }
         }
-    }; 
+    };
 })();
 
 // MWAHAHAHA
@@ -27,7 +24,7 @@ var cities = ["amsterdam", "austin", "berlin", "birmingham", "calgary", "columbu
 
 var crawl = function(callback) {
     var vehicle_list = {};
-    
+
     notify("requests", crawlers.length * cities.length, function() {
         var date = new Date();
         var timestamp = date.getTime();
@@ -42,20 +39,17 @@ var crawl = function(callback) {
         for (var city in vehicle_list) {
             var mapped = vehicle_list[city].map(function(item) {
                 item.city = city;
-                item.timestamp = timestamp;
-                item.timestring = timestring;
                 return item;
             });
 
             vehicles = vehicles.concat(mapped);
         }
 
-        if ( typeof callback === 'function' )
-        {
+        if (typeof callback === 'function') {
             callback(vehicles);
         }
 
-        console.log("Vehicle refresh complete #################################");
+        console.log("[" + moment().format("YYYY-MM-DD HH:mm:ss") + "] Vehicle refresh complete #####################################");
     });
 
     cities.forEach(function(city, index) {
@@ -63,15 +57,14 @@ var crawl = function(callback) {
             var crawler = require(__dirname + "/" + crawler_name + "-crawler.js");
 
             crawler.crawl(city, function(err, real_city, vehicles) {
-                if ( !err ) {
+                if (!err) {
                     if (typeof vehicle_list[real_city] == 'undefined') {
                         vehicle_list[real_city] = [];
                     }
 
                     vehicle_list[real_city] = vehicle_list[real_city].concat(vehicles);
-                }
-                else {
-                    console.log("[Error] " + err);
+                } else if (err.name !== "OutOfBusinessAreaError") {
+                    console.error("[Error] " + err);
                 }
 
                 notify("requests");

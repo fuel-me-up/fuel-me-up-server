@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+var moment = require("moment");
+
 
 var notify = (function() {
     var counters = {};
@@ -67,7 +69,7 @@ var crawl = function(callback) {
             callback(reduced_gasstations);
         }
 
-        console.log("Gasstations refresh complete #################################");
+        console.log("[" + moment().format("YYYY-MM-DD HH:mm:ss") + "] Gasstations refresh complete #################################");
     });
 
     cities.forEach(function(city, index) {
@@ -81,8 +83,8 @@ var crawl = function(callback) {
                     }
 
                     gasstations_list[real_city] = gasstations_list[real_city].concat(gasstations);
-                } else {
-                    console.log("[Error] " + err);
+                } else if (err.name !== "OutOfBusinessAreaError") {
+                    console.error("[Error] " + err);
                 }
 
                 notify("requests");

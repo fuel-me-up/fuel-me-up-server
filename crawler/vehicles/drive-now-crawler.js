@@ -7,57 +7,56 @@ var parser = function(data, callback) {
         var inputJSON = JSON.parse(data);
 
         var vehicles = inputJSON.rec.vehicles.vehicles;
-        vehicles.forEach(function (vehicle, index) {
+        vehicles.forEach(function(vehicle, index) {
             output.push({
-                vin : vehicle.vin, 
+                vin: vehicle.vin,
                 fuel_level: parseInt(vehicle.fuelState, 10),
                 license_plate: vehicle.licensePlate.replace(/\s{2,}/, " "),
                 coordinate: vehicle.position,
-                provider : "drive-now"
+                provider: "drive-now"
             });
         });
-    }
-    catch ( e ) {
-        var fs = require("fs");
-        var timestamp = new Date().getTime();
-
-        console.error("Error parsing drive-now json. See " + timestamp + ".log");
-        fs.writeFile("" + timestamp + ".log", data, function(err) {
-            console.error("Could not even write log file ...");
-        });
+    } catch (e) {
+        console.error("Error parsing drive-now json.");
     }
 
-    if ( typeof callback === 'function') {
+    if (typeof callback === 'function') {
         callback(null, output);
     }
 };
 
 var crawl_vehicles = function(city, callback) {
     var cities = ["6099", "1774", "1293", "40065", "4604", "4259"];
-    if ( cities.indexOf(city) < 0 ) {
-        callback("city not in service", null);
+    if (cities.indexOf(city) < 0) {
+        var error = new Error(city + " not in drive-now business area");
+        error.name = "OutOfBusinessAreaError";
+
+        callback(error, null);
         return;
     }
 
     var city_map = {
-        "6099" : "berlin", 
-        "1774" : "koeln", 
-        "1293" : "duesseldorf", 
-        "40065" : "hamburg", 
-        "4604" : "muenchen",
-        "4259" : "san_francisco"
+        "6099": "berlin",
+        "1774": "koeln",
+        "1293": "duesseldorf",
+        "40065": "hamburg",
+        "4604": "muenchen",
+        "4259": "san_francisco"
     };
 
-    console.log("Crawling drive-now in " + city_map[city] + "...");
-
+    var data = querystring.stringify({
+        cit: city
+    });
     var request_options = {
-        hostname: "de.drive-now.com",  
-        port: 443,      
+        hostname: "de.drive-now.com",
+        port: 443,
         path: "/php/metropolis/json.vehicle_filter?language=de_DE",
         method: "POST",
         headers: {
-            "Content-Type" : "application/x-www-form-urlencoded",
-            "Referer" : "https://de.drive-now.com/php/metropolis/city_" + city_map[city] + "?cit=" + city + "&language=de_DE"
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Referer": "https://de.drive-now.com/php/metropolis/city_" + city_map[city] + "?cit=" + city + "&language=de_DE",
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(data)
         }
     };
 
@@ -70,20 +69,20 @@ var crawl_vehicles = function(city, callback) {
 
         res.on("end", function() {
             parser(body, function(err, vehicles) {
-                callback(null, city_map[city], vehicles);
+                if (!err) {
+                    callback(null, city_map[city], vehicles);
+                } else {
+                    callback(err, city_map[city], []);
+                }
             });
         });
     });
 
     req.on("error", function(e) {
-        console.log("Request failed: " + e);
+        console.error("[drive-now,vehicles]Request failed: " + e);
     });
-    
-    req.write(
-        querystring.stringify({
-            cit : city
-        })
-    );
+
+    req.write(data);
     req.end();
 };
 

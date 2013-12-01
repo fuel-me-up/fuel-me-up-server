@@ -1,8 +1,8 @@
 (function() {
-    var initialize_map = function() {
+    var initialize_map = function(lat, lng) {
         var mapOptions = {
             disableDefaultUI: true,
-            center: new google.maps.LatLng(53.568861, 10.000091),
+            center: new google.maps.LatLng(lat, lng),
             zoom: 13
         };
 
@@ -12,15 +12,25 @@
     var fetch_vehicles = function(filters, callback) {
         filters = filters || {};
 
-        $.get("/vehicles/hamburg", filters, function(res) {
+        var url = "/vehicles";
+        if (typeof filters.city !== "undefined") {
+            url = url + "/" + filters.city;
+        }
+
+        $.getJSON(url, filters, function(res) {
             if (typeof callback === "function") {
                 callback(res);
             }
         });
     };
 
-    var fetch_gasstations = function(callback) {
-        $.get("/gasstations/hamburg", function(res) {
+    var fetch_gasstations = function(filters, callback) {
+        var url = "/gasstations";
+        if (typeof filters.city !== "undefined") {
+            url = url + "/" + filters.city;
+        }
+
+        $.getJSON(url, function(res) {
             if (typeof callback === "function") {
                 callback(res);
             }
@@ -91,7 +101,7 @@
     };
 
     $(document).ready(function() {
-        $("form").sisyphus();
+        $("form.filter-control").sisyphus();
 
         var clusterStyles = [{
             textColor: 'white',
@@ -110,7 +120,9 @@
             width: 50
         }];
 
-        var map = initialize_map();
+        var selected_city = $("input[name='selected-city']").val();
+
+        var map = initialize_map($("input[name='center-latitude']").val(), $("input[name='center-longitude']").val());
         var map_marker_cluster = new MarkerClusterer(map, [], {
             gridSize: 55,
             midClusterSize: 5,
@@ -134,6 +146,7 @@
         // Set saved value and fetch with saved value
         $("output.max-fuel-level").text($("input.max-fuel-level").val() + "%");
         fetch_vehicles({
+            city: selected_city,
             max_fuel_level: parseInt($("input.max-fuel-level").val(), 10)
         }, function(res) {
             set_markers(res, map_marker_cluster);
@@ -142,6 +155,7 @@
         $("input.max-fuel-level")
             .bind("changed", function() {
                 fetch_vehicles({
+                    city: selected_city,
                     max_fuel_level: parseInt($(this).val())
                 }, function(res) {
                     set_markers(res, map_marker_cluster);
@@ -155,7 +169,9 @@
         var gasstation_markers = [];
 
         if ($("input.show-gasstations").is(":checked")) {
-            fetch_gasstations(function(items) {
+            fetch_gasstations({
+                city: selected_city
+            }, function(items) {
                 set_gasstation_markers(items, gasstation_markers, map);
             });
         }
@@ -163,7 +179,9 @@
         $("input.show-gasstations")
             .change(function() {
                 if ($(this).is(":checked")) {
-                    fetch_gasstations(function(items) {
+                    fetch_gasstations({
+                        city: selected_city
+                    }, function(items) {
                         set_gasstation_markers(items, gasstation_markers, map);
                     });
                 } else {

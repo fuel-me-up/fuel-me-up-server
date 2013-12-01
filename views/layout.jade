@@ -13,6 +13,11 @@ html
     body
         block content
 
+    form.hidden
+        input(type="hidden", name="selected-city", value=selected_city)
+        input(type="hidden", name="center-latitude", value=map_center_latitude)
+        input(type="hidden", name="center-longitude", value=map_center_longitude)
+
     script(type="text/javascript", src="http://code.jquery.com/jquery-2.0.3.min.js")
     script(type="text/javascript", src="/js/sisyphus.min.js")
     script(type="text/javascript", src="/js/fmu.js")
