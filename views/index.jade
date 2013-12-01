@@ -1,14 +1,19 @@
 extends layout
 
 block content
-    div(id="map-canvas")
+    div#map-canvas
         
-    form(id="filter-control")
-        div(class="container")
-            div(class="row")
-                div(class="col-md-2 vertically-centered")
+    form#filter-control
+        div.container
+            div.row
+                div.col-xs-2.vertically-centered
                     label(for="max-fuel-level")="Maximum fuel level"
-                div(class="col-md-9 vertically-centered")
-                    input(class="max-fuel-level", type="range", min="0", max="100", value="25")
-                div(class="col-md-1 vertically-centered")
+                div.col-xs-9.vertically-centered
+                    input(class="max-fuel-level", name="max-fuel-level", type="range", min="0", max="100", value="25")
+                div.col-xs-1.vertically-centered
                     output(class="max-fuel-level")="25%"
+            div.row
+                div.col-xs-2.vertically-centered
+                    label(for="show-gasstations")="Show gasstations"
+                div.col-xs-10.vertically-centered
+                    input(class="show-gasstations", name="show-gasstations", id="show-gasstations", type="checkbox")

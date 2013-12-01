@@ -33,6 +33,7 @@ app.use(app.router);
 // development only
 var crawler_interval = 5 * 60000;
 if ('development' == app.get('env')) {
+	console.info("using development environment");
 	app.use(express.errorHandler());
 	crawler_interval = 60 * 60000;
 }

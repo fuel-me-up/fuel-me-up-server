@@ -1,6 +1,6 @@
 html { height: 100% }
 body { height: 100%; font-family: 'Open sans'; font-weight: 300; margin: 0; padding: 0 }
-form { background-color: rgba(255,255,255,.85); display: block; position: absolute; bottom: 0px; margin: 0 25px 25px 25px; padding: 20px 10px; -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px; }
+form > div.container { background-color: rgba(255,255,255,.85); display: block; position: absolute; bottom: 0px; left: 50%; margin: 0 0 25px 0px; padding: 20px 10px; -webkit-border-radius: 10px; -moz-border-radius: 10px; border-radius: 10px; }
 input { display: inline-block; margin: 6px 0 0 0; width: 100%; }
 label { text-align: right; width: 100%; }
 output, label { padding: 4px 0 0 0; }
@@ -10,3 +10,29 @@ input, output, label { vertical-align: middle; }
 #map-canvas { height: 100% }
 div.gm-style-iw { font-family: 'Open sans'; font-weight: 400; }
 div.gm-style-iw h1 { font-size: 12pt; }
+
+@media (max-width: 768px) {
+    form > div.container {
+        left: 0;
+        margin-left: 25px;
+        margin-right: 25px;
+    }
+}
+
+@media (min-width: 768px) {
+    form > div.container {
+        margin-left: -375px;
+    }
+}
+
+@media (min-width: 992px) {
+    form > div.container {
+        margin-left: -485px;
+    }
+}
+
+@media (min-width: 1200px) {
+    form > div.container {
+        margin-left: -585px;
+    }
+}

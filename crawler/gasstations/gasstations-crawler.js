@@ -4,17 +4,16 @@ var notify = (function() {
     var counters = {};
     var callbacks = {};
     return function() {
-        if ( arguments.length == 3 ) {
+        if (arguments.length == 3) {
             counters[arguments[0]] = arguments[1];
             callbacks[arguments[0]] = arguments[2];
-        }
-        else {
+        } else {
             counters[arguments[0]] -= 1;
-            if ( counters[arguments[0]] == 0 ) {
+            if (counters[arguments[0]] == 0) {
                 callbacks[arguments[0]]();
             }
         }
-    }; 
+    };
 })();
 
 // MWAHAHAHA
@@ -23,7 +22,7 @@ var cities = ["amsterdam", "austin", "berlin", "birmingham", "calgary", "columbu
 
 var crawl = function(callback) {
     var gasstations_list = {};
-    
+
     notify("requests", crawlers.length * cities.length, function() {
         var cities_count = 0;
         for (var city in gasstations_list) {
@@ -43,25 +42,28 @@ var crawl = function(callback) {
 
         // Join the stations that are doubled
         var reduced_gasstations = [];
-        for ( var i = 0; i < gasstations.length; i++ ) {
+        for (var i = 0; i < gasstations.length; i++) {
             var found = false;
-            for ( var j = 0; j < reduced_gasstations.length; j++ ) {
+            for (var j = 0; j < reduced_gasstations.length; j++) {
                 var delta = 0.0002;
-                if ( Math.abs(gasstations[i].coordinate.latitude - reduced_gasstations[j].coordinate.latitude) < delta && 
-                    Math.abs(gasstations[i].coordinate.longitude - reduced_gasstations[j].coordinate.longitude) < delta ) {
-                    reduced_gasstations[j].provider.push(gasstations[i].provider[0]);
+                var provider = gasstations[i].provider[0];
+                if (Math.abs(gasstations[i].coordinate.latitude - reduced_gasstations[j].coordinate.latitude) < delta &&
+                    Math.abs(gasstations[i].coordinate.longitude - reduced_gasstations[j].coordinate.longitude) < delta) {
+                    // some gasstations double ...
+                    if (reduced_gasstations[j].provider.indexOf(provider) === -1) {
+                        reduced_gasstations[j].provider.push(gasstations[i].provider[0]);
+                    }
                     found = true;
                     break;
                 }
             }
 
-            if ( found === false ) {
+            if (found === false) {
                 reduced_gasstations.push(gasstations[i]);
             }
         }
 
-        if ( typeof callback === 'function' )
-        {
+        if (typeof callback === 'function') {
             callback(reduced_gasstations);
         }
 
@@ -73,14 +75,13 @@ var crawl = function(callback) {
             var crawler = require(__dirname + "/" + crawler_name + "-gasstations-crawler.js");
 
             crawler.crawl(city, function(err, real_city, gasstations) {
-                if ( !err ) {
+                if (!err) {
                     if (typeof gasstations_list[real_city] == 'undefined') {
                         gasstations_list[real_city] = [];
                     }
 
                     gasstations_list[real_city] = gasstations_list[real_city].concat(gasstations);
-                }
-                else {
+                } else {
                     console.log("[Error] " + err);
                 }
 
