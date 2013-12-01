@@ -30,7 +30,7 @@ app.use(express.methodOverride());
 app.use(app.router);
 
 // development only
-var crawler_interval = 5 * 60000;
+var crawler_interval = 3 * 60000;
 if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
 	crawler_interval = 0.5 * 60000;
