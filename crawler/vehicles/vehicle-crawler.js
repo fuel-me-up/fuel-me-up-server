@@ -14,25 +14,38 @@ var crawl = function(callback) {
         crawlers.forEach(function(provider, index) {
             var crawler = require(path.join(__dirname, provider + "-crawler.js"));
 
-            requests.push(function(async_callback) {
-                crawler.crawl(city, function(err, real_city, vehicles) {
-                    if (!err) {
-                        async_callback(null, {
-                            city: real_city,
-                            vehicles: vehicles.map(function(vehicle) {
-                                vehicle.city = real_city;
+            (function(city) {
+                requests.push(function(async_callback) {
+                    crawler.crawl(city, function(err, real_city, vehicles) {
+                        if (!err) {                            
+                            vehicles = vehicles
+                                .map(function(vehicle) {
+                                    vehicle.city = real_city;
+                                    vehicle.coordinate.latitude = parseFloat(vehicle.coordinate.latitude);
+                                    vehicle.coordinate.longitude = parseFloat(vehicle.coordinate.longitude);
 
-                                return vehicle;
-                            })
-                        });
-                    } else if (err.name !== "OutOfBusinessAreaError") {
-                        console.error("[Error] " + err);
-                        async_callback(err, null);
-                    } else {
-                        async_callback(null, null);
-                    }
+                                    return vehicle;
+                                })
+                                .filter(function(vehicle) {
+                                    // Filter vehicles with no location
+                                    var delta = 0.1;
+                                    return Math.abs(vehicle.coordinate.latitude) > delta &&
+                                        Math.abs(vehicle.coordinate.longitude) > delta;
+                                });
+
+                            async_callback(null, {
+                                city: real_city,
+                                vehicles: vehicles
+                            });
+                        } else if (err.name !== "OutOfBusinessAreaError") {
+                            console.error("[Error] " + err);
+                            async_callback(err, null);
+                        } else {
+                            async_callback(null, null);
+                        }
+                    });
                 });
-            });
+            })(city);
         });
     });
 

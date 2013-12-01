@@ -115,7 +115,14 @@ exports.vehicles = function(new_vehicles) {
 };
 
 exports.all_vehicles = function(req, res) {
-    res.send(200, vehicles);
+    var max_fuel_level = parseInt(req.query.max_fuel_level, 10);
+    if (typeof req.query.max_fuel_level === 'undefined') {
+        max_fuel_level = 100;
+    }
+
+    res.send(200, vehicles.filter(function(vehicle) {
+        return vehicle.fuel_level <= max_fuel_level;
+    }));
 };
 
 exports.vehicles_in_city = function(req, res) {
@@ -138,11 +145,9 @@ exports.vehicles_in_city = function(req, res) {
                 max_fuel_level = 100;
             }
 
-            var filtered = vehicles.filter(function(vehicle) {
+            res.send(200, vehicles.filter(function(vehicle) {
                 return vehicle.city === req.params.city && vehicle.fuel_level <= max_fuel_level;
-            });
-
-            res.send(200, filtered);
+            }));
         }
     });
 };

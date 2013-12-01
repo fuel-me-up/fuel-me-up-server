@@ -55,7 +55,7 @@ var crawl_vehicles = function(city, callback) {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "Referer": "https://de.drive-now.com/php/metropolis/city_" + city_map[city] + "?cit=" + city + "&language=de_DE",
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
             "Content-Length": Buffer.byteLength(data)
         }
     };
