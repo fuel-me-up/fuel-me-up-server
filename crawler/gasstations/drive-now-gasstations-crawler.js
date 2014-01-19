@@ -4,23 +4,21 @@ var querystring = require("querystring");
 var parser = function(data, callback) {
     var output = [];
     try {
-        data = data.replace(/^var\s*petrol_stations\s*=\s*/, "");
-        data = data.replace(/];/, "]");
-
         var inputJSON = JSON.parse(data);
 
+        inputJSON = inputJSON.rec.stations;
         inputJSON.forEach(function(gasstation, index) {
             output.push({
-                name: gasstation.meta.organization,
+                name: gasstation.name,
                 coordinate: {
-                    latitude: parseFloat(gasstation.lat),
-                    longitude: parseFloat(gasstation.lng),
+                    latitude: parseFloat(gasstation.position.lat),
+                    longitude: parseFloat(gasstation.position.lng),
                 },
                 provider: "drive-now"
             });
         });
     } catch (e) {
-        console.error("Error parsing drive-now json.");
+        console.error("Error parsing drive-now gasstations json: " + e.toString());
     }
 
     if (typeof callback === 'function') {
@@ -53,14 +51,13 @@ var crawl_vehicles = function(city, callback) {
     var request_options = {
         hostname: "de.drive-now.com",
         port: 443,
-        path: "/static/metropolis/js/lib/data/" + city + "/PetrolStations.js", //"/php/metropolis/json.vehicle_filter?language=de_DE",
-        method: "GET",
+        path: "/php/metropolisws/mobile.get_stations?is_drive-now_dot_com=1&language=de_DE&tenant=germany",
+        method: "POST",
         headers: {
-            "Accept": "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01",
-            "Referer": "https://de.drive-now.com/php/metropolis/city_" + city_map[city] + "?cit=" + city + "&language=de_DE",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36",
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Referer": "https://de.drive-now.com/",
+            "Origin":"https://de.drive-now.com/",
+            "Content-Type": "application/x-www-form-urlencoded",
             "Content-Length": Buffer.byteLength(data)
         }
     };

@@ -64,6 +64,7 @@ crawl_gasstations();
 
 // API
 app.get('/', site.index);
+app.get('/city', site.city);
 
 app.get('/vehicles', vehicles_api.all_vehicles);
 app.get('/vehicles/:city', vehicles_api.vehicles_in_city);
