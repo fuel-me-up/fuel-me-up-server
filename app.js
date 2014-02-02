@@ -32,7 +32,7 @@ app.use(app.router);
 // development only
 var crawler_interval = 3 * 60000;
 if (typeof process.env.UPDATE_INTERVAL !== "undefined") {
-    crawler_interval = parseFloat(process.env.UPDATE_INTERVAL) * 60000;
+	crawler_interval = parseFloat(process.env.UPDATE_INTERVAL) * 60000;
 }
 
 console.info("Setting crawler interval to " + (crawler_interval / 1000) + " seconds");
@@ -67,9 +67,11 @@ app.get('/', site.index);
 
 app.get('/vehicles', vehicles_api.all_vehicles);
 app.get('/vehicles/:city', vehicles_api.vehicles_in_city);
+app.get('/nearest', vehicles_api.nearest_vehicle);
 
 app.get('/gasstations', gasstations_api.all_gasstations);
 app.get('/gasstations/:city', gasstations_api.gasstations_in_city);
+
 
 
 // --------
