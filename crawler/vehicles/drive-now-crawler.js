@@ -17,7 +17,7 @@ var parser = function(data, callback) {
             });
         });
     } catch (e) {
-        console.error("Error parsing drive-now json.");
+        console.error("Error parsing drive-now vehicles json: " + e.toString());
     }
 
     if (typeof callback === 'function') {
@@ -50,11 +50,12 @@ var crawl_vehicles = function(city, callback) {
     var request_options = {
         hostname: "de.drive-now.com",
         port: 443,
-        path: "/php/metropolis/json.vehicle_filter?language=de_DE",
+        path: "/php/metropolisws/mobile.find_free_veh?is_drive-now_dot_com=1=de_DE",
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            "Referer": "https://de.drive-now.com/php/metropolis/city_" + city_map[city] + "?cit=" + city + "&language=de_DE",
+            "Referer": "https://de.drive-now.com/",
+            "Origin":"https://de.drive-now.com/",
             "Content-Type": "application/x-www-form-urlencoded",
             "Content-Length": Buffer.byteLength(data)
         }

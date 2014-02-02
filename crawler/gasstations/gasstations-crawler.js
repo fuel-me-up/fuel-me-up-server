@@ -4,7 +4,8 @@ var path = require('path');
 var moment = require("moment");
 var async = require("async");
 
-var crawlers = ["car2go", "drive-now"];
+// var crawlers = ["car2go", "drive-now"];
+var crawlers = ["car2go"];
 var cities = ["amsterdam", "austin", "berlin", "birmingham", "calgary", "columbus", "denver", "duesseldorf", "hamburg", "koeln", "london", "miami", "milano", "minneapolis", "montreal", "muenchen", "portland", "sandiego", "seattle", "stuttgart", "toronto", "ulm", "vancouver", "washingtondc", "wien", "6099", "1774", "1293", "40065", "4604", "4259"];
 
 var crawl = function(callback) {
