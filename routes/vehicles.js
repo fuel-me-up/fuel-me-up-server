@@ -157,40 +157,43 @@ exports.nearest_vehicle = function(req, res) {
     var longitude = parseFloat(req.query.longitude);
     var provider = req.query.provider;
 
-    if (typeof latitude === "undefined" || typeof longitude === "undefined" ) {
-        return res.send(400);
+    if (typeof latitude === "undefined" || typeof longitude === "undefined") {
+        return res.send(400, "latitude and longitude are required!");
     }
+
 
     if (typeof provider === "undefined") {
         provider = "all"
     }
+    if (provider == "car2go" || provider == "drive-now" || provider == "all") {
+        vehicles.sort(function(a, b) {
+            var distA = getDistanceFromLatLonInKm(latitude, longitude, a.coordinate.latitude, a.coordinate.longitude);
+            var distB = getDistanceFromLatLonInKm(latitude, longitude, b.coordinate.latitude, b.coordinate.longitude);
 
-    vehicles.sort(function(a, b) {
-        var distA = getDistanceFromLatLonInKm(latitude, longitude, a.coordinate.latitude, a.coordinate.longitude);
-        var distB = getDistanceFromLatLonInKm(latitude, longitude, b.coordinate.latitude, b.coordinate.longitude);
-
-        return distA - distB;
-    });
+            return distA - distB;
+        });
 
 
-    var result = getFirstVehicleForProvider(provider);
-    result.distance = Math.round(getDistanceFromLatLonInKm(latitude, longitude, result.coordinate.latitude, result.coordinate.longitude) * 1000) + "";
-    res.send(200, result);
+        var result = getFirstVehicleForProvider(provider);
+        result.distance = Math.round(getDistanceFromLatLonInKm(latitude, longitude, result.coordinate.latitude, result.coordinate.longitude) * 1000) + "";
+        res.send(200, result);
+    } else {
+        return res.send(400, "provider not supported!");
+    }
 };
 
 function getFirstVehicleForProvider(provider) {
     if (provider == "all") {
         return vehicles[0];
     }
-    var res = null;
     var i = 0;
-    while (res == null) {
+    while (i <= vehicles.length) {
         if (vehicles[i].provider == provider) {
-            res = vehicles[i];
+            return vehicles[i];
         }
         i++;
     }
-    return res;
+    return null;
 }
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
