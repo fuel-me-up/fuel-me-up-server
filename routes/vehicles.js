@@ -166,9 +166,9 @@ exports.nearest_vehicle = function(req, res) {
 
         return distA - distB;
     });
-    var res = vehicles[0];
-    res.distance = Math.round(getDistanceFromLatLonInKm(latitude, longitude, res.coordinate.latitude, res.coordinate.longitude) * 1000);
-    res.send(200, res);
+    var result = vehicles[0];
+    result.distance = Math.round(getDistanceFromLatLonInKm(latitude, longitude, result.coordinate.latitude, result.coordinate.longitude) * 1000);
+    res.send(200, result);
 };
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
