@@ -157,7 +157,7 @@ exports.nearest_vehicle = function(req, res) {
     var longitude = parseFloat(req.query.longitude);
     var provider = req.query.provider;
 
-    if (typeof latitude === "undefined" || typeof longitude === "undefined"  || provider != "car2go" || provider != "drive-now") {
+    if (typeof latitude === "undefined" || typeof longitude === "undefined" ) {
         return res.send(400);
     }
 
