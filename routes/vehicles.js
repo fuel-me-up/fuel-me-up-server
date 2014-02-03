@@ -159,14 +159,16 @@ exports.nearest_vehicle = function(req, res) {
     if (typeof latitude === "undefined" || typeof longitude === "undefined") {
         return res.send(400);
     }
-    
+
     vehicles.sort(function(a, b) {
         var distA = getDistanceFromLatLonInKm(latitude, longitude, a.coordinate.latitude, a.coordinate.longitude);
         var distB = getDistanceFromLatLonInKm(latitude, longitude, b.coordinate.latitude, b.coordinate.longitude);
 
         return distA - distB;
     });
-    res.send(200, vehicles[0]);
+    var res = vehicle[0];
+    res.distance = Math.round(getDistanceFromLatLonInKm(latitude, longitude, res.coordinate.latitude, res.coordinate.longitude) * 1000);
+    res.send(200, res);
 };
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
