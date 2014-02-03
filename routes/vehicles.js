@@ -155,9 +155,14 @@ exports.vehicles_in_city = function(req, res) {
 exports.nearest_vehicle = function(req, res) {
     var latitude = parseFloat(req.query.latitude);
     var longitude = parseFloat(req.query.longitude);
+    var provider = req.query.provider;
 
     if (typeof latitude === "undefined" || typeof longitude === "undefined") {
         return res.send(400);
+    }
+
+    if (typeof provider === "undefined") {
+        provider = "all"
     }
 
     vehicles.sort(function(a, b) {
@@ -166,10 +171,27 @@ exports.nearest_vehicle = function(req, res) {
 
         return distA - distB;
     });
-    var result = vehicles[0];
+
+
+    var result = getFirstVehicleForProvider(provider);
     result.distance = Math.round(getDistanceFromLatLonInKm(latitude, longitude, result.coordinate.latitude, result.coordinate.longitude) * 1000) + "";
     res.send(200, result);
 };
+
+function getFirstVehicleForProvider(provider) {
+    if (provider == "all") {
+        return vehicles[0];
+    }
+    var res = null;
+    var i = 0;
+    while (res == null) {
+        if (vehicles[i].provider == provider) {
+            res = vehicles[i];
+        }
+        i++;
+    }
+    return res;
+}
 
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
     var R = 6371; // Radius of the earth in km
