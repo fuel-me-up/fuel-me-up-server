@@ -68,6 +68,10 @@ var city_coordinates = {
         "latitude": 48.144556,
         "longitude": 11.584976
     },
+    "newyorkcity": {
+        "latitude": 40.646416,
+        "longitude": -73.988600
+    },
     "portland": {
         "latitude": 43.667127,
         "longitude": -70.255562
