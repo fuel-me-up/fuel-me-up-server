@@ -16,6 +16,7 @@
 	"Montreal",
 	"Muenchen",
 	"Mortland",
+	"NewYorkCity",
 	"Sandiego",
 	"Seattle",
 	"Stuttgart",
